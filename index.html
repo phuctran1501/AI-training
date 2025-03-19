@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Image Prediction</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
     <link href="assets/style.css" rel="stylesheet">
-  </head>
-  <body>
+</head>
+
+<body>
     <h2>Upload Image for Prediction</h2>
     <input type="file" id="image-input" accept="image/*">
-    <img id="uploaded-image" style="display:none;" />
-    <div id="label-container"></div>
-    
+    <div class="container">
+        <img id="uploaded-image" style="display:none;" />
+        <div id="label-container"></div>
+    </div>
+
+
     <script>
         const URL = "https://teachablemachine.withgoogle.com/models/AZCIGRJOE/";
         let model, labelContainer, maxPredictions;
-        
+
         async function loadModel() {
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
@@ -29,19 +34,27 @@
         async function predictImage(imageElement) {
             const prediction = await model.predict(imageElement);
             labelContainer.innerHTML = "";
+            // Tim phan tram caocao
+            const maxProbability = Math.max(...prediction.map(pred => pred.probability));
             prediction.forEach(pred => {
-                const classPrediction = `${pred.className}: ${pred.probability.toFixed(2)}`;
+                const percentage = (pred.probability * 100).toFixed(2) + "%";
+                const classPrediction = `${pred.className}: ${percentage}`;
+
                 const div = document.createElement("div");
                 div.textContent = classPrediction;
+                if (pred.probability === maxProbability) {
+                    div.style.color = "red";
+                    div.style.fontWeight = "bold";
+                }
                 labelContainer.appendChild(div);
             });
         }
 
-        document.getElementById("image-input").addEventListener("change", function(event) {
+        document.getElementById("image-input").addEventListener("change", function (event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     const img = document.getElementById("uploaded-image");
                     img.src = e.target.result;
                     img.style.display = "block";
@@ -53,5 +66,6 @@
 
         loadModel();
     </script>
-  </body>
+</body>
+
 </html>
